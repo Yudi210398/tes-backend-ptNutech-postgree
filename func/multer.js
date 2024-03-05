@@ -32,7 +32,12 @@ export const singleUploadMiddleware = (req, res, next) => {
       if (err instanceof multer.MulterError) {
         if (err.code === "LIMIT_UNEXPECTED_FILE") {
           // Jika pengguna mengunggah lebih dari satu file
-          return next(new HttpError("Hanya satu file yang diizinkan", 400));
+          return next(
+            new HttpError(
+              "Hanya satu file yang diizinkan dan key harus profile_image",
+              400
+            )
+          );
         }
         // Tangani jenis kesalahan Multer lainnya
         return next(new HttpError("Kesalahan saat mengunggah file", 500));

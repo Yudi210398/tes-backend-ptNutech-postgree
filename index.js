@@ -21,7 +21,6 @@ dotenv.config();
   app.use(routerMembership);
   app.use(routerInformation);
   app.use(routerTransactions);
-
   app.use(routerError);
 
   // eslint-disable-next-line no-unused-vars

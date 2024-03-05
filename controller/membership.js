@@ -1,11 +1,11 @@
 import { validationResult } from "express-validator";
-import shemaMembership from "../model/shemaMembership.js";
 import HttpError from "../init/http-error.js";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import getDataUri from "../middleware/dataUri.js";
 import dataFuncCloudinary from "../middleware/cloudinary.js";
 import { pool } from "../init/configurasiPostgres.js";
+import { balikinDataMemberByEmail } from "../func/fungsiRefactor.js";
 
 export const postUser = async (req, res, next) => {
   try {
@@ -46,7 +46,7 @@ export const loginUser = async (req, res, next) => {
 
     const { rows } = await pool.query(
       `SELECT * FROM membership WHERE email = $1`,
-      [email],
+      [email]
     );
 
     if (rows.length === 0) throw new HttpError("email tidak ditemukan", 404);
@@ -76,10 +76,11 @@ export const loginUser = async (req, res, next) => {
 
 export const getProfile = async (req, res, next) => {
   try {
-    const { rows } = await pool.query(
-      "SELECT first_name, last_name, email, profile_image FROM membership WHERE email = $1",
-      [req.userData.email],
-    );
+    const rows = await balikinDataMemberByEmail(pool, req);
+
+    const datas = await pool.query(`SELECT * FROM informations`);
+
+    console.log(datas.rows[0].banner);
 
     if (!rows[0]) throw new HttpError("user tidak ditemukan", 401);
 
@@ -89,6 +90,7 @@ export const getProfile = async (req, res, next) => {
       data: rows[0],
     });
   } catch (err) {
+    console.log(err, `ler`);
     next(err);
   }
 };
@@ -101,25 +103,17 @@ export const updateProfile = async (req, res, next) => {
 
     if (!error.isEmpty()) throw new HttpError(error.array()[0 ?? 1].msg, 400);
 
-    const getData = await shemaMembership.find();
+    await pool.query(
+      "update membership set first_name  = $1 , last_name =$2  where email = $3",
+      [first_name, last_name, req.userData.email]
+    );
 
-    const filterData = getData.filter(
-      (data) => data.email === req.userData.email,
-    )[0];
-    if (!filterData) throw new HttpError("User tidak ditemukan", 404);
-
-    filterData.first_name = await first_name;
-    filterData.last_name = await last_name;
-
-    await filterData.save();
+    const rows = await balikinDataMemberByEmail(pool, req);
 
     res.status(200).json({
       status: 200,
       message: "Sukses",
-      data: {
-        first_name: filterData.first_name,
-        last_name: filterData.last_name,
-      },
+      data: rows[0],
     });
   } catch (err) {
     next(err);
@@ -128,12 +122,6 @@ export const updateProfile = async (req, res, next) => {
 
 export const updateProfileImage = async (req, res, next) => {
   try {
-    const getData = await shemaMembership.find();
-    const filterData = getData.filter(
-      (data) => data.email === req.userData.email,
-    )[0];
-    if (!filterData) throw new HttpError("User tidak ditemukan", 404);
-
     const gambarCloudUri = getDataUri(req.file);
     const uploadImageCloud = await dataFuncCloudinary.uploader.upload(
       gambarCloudUri.content,
@@ -144,22 +132,20 @@ export const updateProfileImage = async (req, res, next) => {
         } catch (err) {
           next(err);
         }
-      },
+      }
     );
 
-    filterData.profile_image = uploadImageCloud.secure_url;
+    await pool.query(
+      "update membership set profile_image = $1 where email = $2",
+      [uploadImageCloud.secure_url, req.userData.email]
+    );
 
-    await filterData.save();
+    const rowsUpdateImage = await balikinDataMemberByEmail(pool, req);
 
     res.status(200).json({
       status: 200,
       message: "Sukses",
-      data: {
-        email: filterData.email,
-        first_name: filterData.first_name,
-        last_name: filterData.last_name,
-        profile_image: filterData.profile_image,
-      },
+      data: rowsUpdateImage,
     });
   } catch (err) {
     next(err);
