@@ -46,7 +46,7 @@ CREATE TABLE informations (
 );
 
 
--- * ambil data semua member
+-- * ambil data semua infromation
 select * from informations;
 
 CREATE TABLE informations (

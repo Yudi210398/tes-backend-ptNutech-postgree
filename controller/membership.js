@@ -46,7 +46,7 @@ export const loginUser = async (req, res, next) => {
 
     const { rows } = await pool.query(
       `SELECT * FROM membership WHERE email = $1`,
-      [email]
+      [email],
     );
 
     if (rows.length === 0) throw new HttpError("email tidak ditemukan", 404);
@@ -80,7 +80,7 @@ export const getProfile = async (req, res, next) => {
 
     const datas = await pool.query(`SELECT * FROM informations`);
 
-    console.log(datas.rows[0].banner);
+    console.log(datas.rows[0].service);
 
     if (!rows[0]) throw new HttpError("user tidak ditemukan", 401);
 
@@ -105,7 +105,7 @@ export const updateProfile = async (req, res, next) => {
 
     await pool.query(
       "update membership set first_name  = $1 , last_name =$2  where email = $3",
-      [first_name, last_name, req.userData.email]
+      [first_name, last_name, req.userData.email],
     );
 
     const rows = await balikinDataMemberByEmail(pool, req);
@@ -132,12 +132,12 @@ export const updateProfileImage = async (req, res, next) => {
         } catch (err) {
           next(err);
         }
-      }
+      },
     );
 
     await pool.query(
       "update membership set profile_image = $1 where email = $2",
-      [uploadImageCloud.secure_url, req.userData.email]
+      [uploadImageCloud.secure_url, req.userData.email],
     );
 
     const rowsUpdateImage = await balikinDataMemberByEmail(pool, req);
