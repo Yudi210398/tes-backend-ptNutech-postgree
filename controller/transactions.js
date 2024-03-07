@@ -116,8 +116,6 @@ export const topUp = async (req, res, next) => {
 
     await pool.query("BEGIN");
 
-    const findEmail = await balikinDataMemberByEmailBalance(pool, req);
-
     const error = validationResult(req);
 
     if (!error.isEmpty()) throw new HttpError(error.array()[0 ?? 1].msg, 400);
@@ -135,7 +133,7 @@ export const topUp = async (req, res, next) => {
     res.status(200).json({
       status: 200,
       message: "Sukses",
-      data: { saldo: +findEmail[0].balance + +top_up_amount },
+      data: { top_up_amount },
     });
     await pool.query("COMMIT");
   } catch (err) {
