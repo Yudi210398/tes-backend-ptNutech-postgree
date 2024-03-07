@@ -20,3 +20,13 @@ export const balikinDataMemberByEmail = async (pool, req) => {
 
   return rows;
 };
+
+export const balikinDataMemberByEmailBalance = async (pool, req) => {
+  const { rows } = await pool.query(
+    "SELECT balance FROM membership WHERE email = $1",
+    [req.userData.email]
+  );
+
+  if (!rows[0]) throw new HttpError("User tidak ditemukan", 404);
+  return rows;
+};
