@@ -3,7 +3,6 @@ import cors from "cors";
 import bodyParser from "body-parser";
 import routerMembership from "./router/membershipRouter.js";
 import dotenv from "dotenv";
-import { conekDb } from "./init/configurasiMongo.js";
 import routerError from "./router/routerError.js";
 import routerInformation from "./router/informationRouter.js";
 
@@ -47,8 +46,7 @@ dotenv.config();
     else
       console.log(`konek ke postgres
     `);
-    conekDb().then(() => {
-      app.listen(3001);
-    });
+
+    app.listen(3001);
   });
 })();
