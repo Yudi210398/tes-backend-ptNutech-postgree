@@ -135,7 +135,7 @@ export const topUp = async (req, res, next) => {
     res.status(200).json({
       status: 200,
       message: "Sukses",
-      data: +findEmail[0].balance + +top_up_amount,
+      data: { saldo: +findEmail[0].balance + +top_up_amount },
     });
     await pool.query("COMMIT");
   } catch (err) {
