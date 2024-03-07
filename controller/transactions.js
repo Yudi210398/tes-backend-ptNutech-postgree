@@ -45,7 +45,7 @@ export const transaction = async (req, res, next) => {
     if (cariService?.rows.length === 0)
       throw new HttpError("Service ataus Layanan tidak ditemukan", 400);
 
-    if (+findEmail[0].balance <= +cariService?.rows[0].service_tariff)
+    if (+findEmail[0].balance < +cariService?.rows[0].service_tariff)
       throw new HttpError("Balace/Saldo anda tidak cukup", 400);
 
     await pool.query(
